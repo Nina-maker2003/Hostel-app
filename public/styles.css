@@ -1,0 +1,278 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-top: 20px;
+  }
+  
+  small {
+    font-size: 0.8em;
+    color: #666;
+  }
+  
+  .form-group {
+    margin: 15px 0;
+  }
+  
+  input, textarea {
+    width: 95%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  textarea {
+    height: 100px;
+    resize: vertical;
+  }
+  
+  button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  #result, #feedbackResult, #extendStayResult, #extendPasswordResult {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 4px;
+    transition: opacity 0.5s ease;
+  }
+  
+  .success {
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+  }
+  
+  .error {
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+  }
+  
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  #loading, #extendPasswordLoading {
+    text-align: center;
+    margin: 15px 0;
+    color: #666;
+  }
+  
+  .feedback-container {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .feedback-toggle {
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  
+  /* 調整したメニューボタンスタイル */
+  .menu-button {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+  }
+   /* パスワードセクション区切り用スタイル */
+   .password-section {
+    margin-bottom: -40px;
+    padding-bottom: -20px;
+  }
+  .menu-icon {
+    margin-right: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 18px;
+    height: 14px;
+  }
+  
+  .menu-icon span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: white;
+    border-radius: 1px;
+  }
+  
+  .menu-text {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .menu-title {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+  }
+  
+  .menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 90;
+  }
+  
+  .menu-items {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80%;
+    max-width: 300px;
+    height: 100%;
+    background-color: white;
+    padding: 70px 20px 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+  }
+  
+  .menu-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .menu-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .menu-item.active {
+    background-color: rgba(52, 152, 219, 0.2);
+    font-weight: bold;
+  }
+  
+  .page {
+    display: none;
+  }
+  
+  .page.active {
+    display: block;
+  }
+  
+  /* リクエストページ用のスタイル */
+  .request-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .request-button {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+  }
+  
+  .request-button:hover {
+    background-color: #2980b9;
+  }
+  
+  .request-subpage {
+    display: none;
+    margin-top: 20px;
+  }
+  
+  .back-button {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #3498db;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  /* 延泊予約ガイド用のスタイル */
+  .extend-guide {
+    margin-top: 40px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .extend-guide h3 {
+    color: #3498db;
+    margin-top: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .extend-guide h3:before {
+    content: "📝";
+    margin-right: 8px;
+    font-size: 20px;
+  }
+  
+  .extend-guide ol {
+    padding-left: 25px;
+    margin-bottom: 0;
+  }
+  
+  .extend-guide li {
+    margin-bottom: 10px;
+    position: relative;
+    line-height: 1.4;
+  }
+  
+  .extend-guide li:last-child {
+    margin-bottom: 0;
+  }
+  
+  .extend-guide small {
+    display: block;
+    color: #666;
+    margin-top: 3px;
+  }
