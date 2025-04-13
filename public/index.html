@@ -20,7 +20,7 @@
   <div class="menu-container" id="menuContainer" onclick="closeMenuOnOutsideClick(event)">
     <div class="menu-items">
       <div class="menu-title">メニュー（Menu）</div>
-      <div class="menu-item active" onclick="changePage('passwordPage')">裏口パスワード照会<br><small>Back Door Password</small></div>
+      <div class="menu-item active" onclick="changePage('passwordPage')">パスワード照会<br><small>Check Password</small></div>
       <div class="menu-item" onclick="changePage('extendStayPage')">延泊リクエスト<br><small>Extend Your Stay</small></div>
       <div class="menu-item" onclick="changePage('requestsPage')">各種リクエスト<br><small>Service Requests</small></div>
     </div>
@@ -46,7 +46,7 @@
 
      <!-- 延泊パスワードセクション（新規追加） -->
      <div class="password-section">
-      <h1>延泊パスワード<br><small>Extend Stay Password</small></h1>
+      <h1>延泊パスワード<br><small>Extended Stay Password</small></h1>
       <p>予約番号と部屋番号をご入力ください。<br>
       <small>Please enter your reservation number and room number</small></p>
       <div class="form-group">
@@ -80,8 +80,8 @@
   <!-- 延泊リクエストページ -->
   <div id="extendStayPage" class="page">
     <h1>延泊リクエスト<br><small>Extend Your Stay</small></h1>
-    <p>延泊予約をしたらこちらに新規予約の予約番号とお客様の部屋番号をご入力ください。<br>
-    <small>After making an extension reservation, please enter your new reservation number and current room number.</small></p>
+    <p><span class="emphasis">新パスワード発行のために</span>延泊予約完了後に、新規予約の予約番号とお客様の部屋番号をご入力ください。<br>
+    <small>[<span class="emphasis">To get your new password</span>, please enter your new reservation number and current room number <span class="emphasis">after</span> making an extension reservation]</small></p>
     
     <div class="form-group">
       <input type="text" id="extendReservationNumber" placeholder="予約番号 / Reservation Number" autocomplete="off">
@@ -96,15 +96,15 @@
     <div class="extend-guide">
       <h3>延泊予約の仕方 / How to extend your stay</h3>
       <ol>
-        <li>公式サイトの延泊専用プランにて新規予約<br>
-            <small>Make a new reservation through the extension plan on our official website</small>
+        <li><a href="https://go-tomariyaueno.reservation.jp/ja" target="_blank">公式サイト</a>の延泊専用プランにて新規予約<br>
+            <small>Make a new reservation through the extension plan on our <a href="https://go-tomariyaueno.reservation.jp/en" target="_blank">official website</a></small>
         </li>
         <li>お客様が前回利用された予約サイトより新規予約<br>
             <small>Make a new reservation through the same booking site you used last time</small>
         </li>
       </ol>
-      <p class="important-notice">★チェックイン開始時刻(15:00)までにメニュー＞パスワード照会にて新パスワードを確認できるようになります。</p> 
-            <small>★The new password will be available via Menu > Check Password by the check-in time (3:00 PM).</small>
+      <p class="important-notice">★チェックイン開始時刻(15:00)までに<strong>メニュー＞パスワード照会</strong>にて新パスワードを確認できるようになります。</p> 
+            <small>★The new password will be available via <strong>Menu > Check Password</strong> by the check-in time (3:00 PM).</small>
     </div>   
     </div>
   </div>
@@ -116,7 +116,7 @@
     <!-- リクエストボタン一覧 -->
     <div class="request-buttons">
       <div class="request-button" onclick="showRequestSubpage('cleaning')">
-        ① 清掃リクエスト<br><small>Cleaning request</small>
+        ① 清掃リクエスト（4日以上宿泊の方）<br><small>Cleaning request(only for those staying over 4 days)</small>
       </div>
       <div class="request-button" onclick="showRequestSubpage('other')">
         ② その他リクエスト<br><small>Other requests</small>
@@ -127,14 +127,14 @@
     <div id="cleaningPage" class="request-subpage">
       <div class="back-button" onclick="hideRequestSubpages()">← 戻る / Back</div>
       <h2>清掃リクエスト<br><small>Cleaning request</small></h2>
-      <p>ただいま工事中です。<br><small>This page is currently under construction.</small></p>
+      <p>ただいま工事中です。<br><small>under construction:)</small></p>
     </div>
     
     <!-- その他リクエストのサブページ -->
     <div id="otherPage" class="request-subpage">
       <div class="back-button" onclick="hideRequestSubpages()">← 戻る / Back</div>
       <h2>その他リクエスト<br><small>Other requests</small></h2>
-      <p>ただいま工事中です。<br><small>This page is currently under construction.</small></p>
+      <p>ただいま工事中です。<br><small>under construction:)</small></p>
     </div>
   </div>
 
