@@ -5,12 +5,12 @@ const { GoogleAuth } = require('google-auth-library');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const CREDENTIALS_PATH = path.resolve(__dirname, '../credentials.json');
+// Spreadsheet configuration
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// メール送信用のトランスポーター設定
+// Configure email transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -19,21 +19,58 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Google Sheets APIクライアントの初期化
+// Get credentials - either from file or environment variables
 async function getAuthClient() {
-  const auth = new GoogleAuth({
-    keyFile: CREDENTIALS_PATH,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-  return auth.getClient();
+  try {
+    // Path to credentials file
+    const CREDENTIALS_PATH = path.resolve(__dirname, '../credentials.json');
+    
+    let auth;
+    
+    // Check if credentials file exists
+    if (fs.existsSync(CREDENTIALS_PATH)) {
+      // Use credentials file (works for local development)
+      auth = new GoogleAuth({
+        keyFile: CREDENTIALS_PATH,
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+    } else {
+      // For render.com: use environment variable or JSON string
+      // You would need to set GOOGLE_CREDENTIALS as an environment variable in render.com
+      // containing the entire credentials JSON as a string
+      const credentials = process.env.GOOGLE_CREDENTIALS ? 
+                         JSON.parse(process.env.GOOGLE_CREDENTIALS) : 
+                         null;
+                         
+      if (!credentials) {
+        throw new Error('No credentials found - set GOOGLE_CREDENTIALS env variable or provide credentials.json');
+      }
+      
+      auth = new GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+    }
+    
+    return auth.getClient();
+  } catch (error) {
+    console.error('Authentication error:', error);
+    throw error;
+  }
 }
 
+// Get Google Sheets client
 async function getSheetsClient() {
-  const authClient = await getAuthClient();
-  return google.sheets({ version: 'v4', auth: authClient });
+  try {
+    const authClient = await getAuthClient();
+    return google.sheets({ version: 'v4', auth: authClient });
+  } catch (error) {
+    console.error('Error getting sheets client:', error);
+    throw error;
+  }
 }
 
-// テスト接続用関数
+// Test connection function
 async function testConnection() {
   try {
     const sheets = await getSheetsClient();
@@ -42,26 +79,29 @@ async function testConnection() {
     });
     return { success: true, title: response.data.properties.title };
   } catch (error) {
-    console.error('Connection test failed:', error.message);
-    throw new Error('Failed to connect to Google Sheets API');
+    console.error('Connection test failed:', error);
+    throw new Error(`Failed to connect to Google Sheets API: ${error.message}`);
   }
 }
 
-// 日本語テキスト正規化関数
+// Rest of your functions remain the same
+// ...
+
+// Japanese text normalization
 function normalizeJapaneseText(text) {
   if (!text) return '';
   
-  // 全角→半角変換 (カタカナは対象外)
+  // Convert full-width to half-width (except katakana)
   const normalized = text
     .replace(/[！-～]/g, function(s) {
       return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     })
-    .replace(/　/g, ' '); // 全角スペース→半角スペース
+    .replace(/　/g, ' '); // Full-width space to half-width
   
   return normalized;
 }
 
-// パスワード取得
+// Get password
 async function getPassword() {
   try {
     const sheets = await getSheetsClient();
@@ -72,12 +112,12 @@ async function getPassword() {
     
     return response.data.values[0][0];
   } catch (error) {
-    console.error('Error getting password:', error.message);
+    console.error('Error getting password:', error);
     throw error;
   }
 }
 
-// ゲスト認証
+// Verify guest
 async function verifyGuest(name, roomNumber) {
   try {
     const sheets = await getSheetsClient();
@@ -89,26 +129,24 @@ async function verifyGuest(name, roomNumber) {
     const rows = response.data.values;
     const now = new Date();
     
-    // 入力された名前を正規化
+    // Normalize input name
     const normalizedInputName = normalizeJapaneseText(name).toLowerCase().replace(/\s+/g, '');
     const trimmedInputRoom = roomNumber.toString().trim().toUpperCase();
 
-    // ヘッダー行をスキップ
+    // Skip header row
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      // GASコードでの列の割り当てに合わせる
-      // A:予約番号, C:予約者名, D:部屋番号, E:C/I, F:C/O, K:ステータス
-      const currentName = String(row[2] || '');    // C列 (インデックス2)
-      const currentRoomNumber = row[3];           // D列 (インデックス3)
-      const checkInDate = row[4];                 // E列 (インデックス4)
-      const checkOutDate = row[5];                // F列 (インデックス5)
-      const status = row[10];                     // K列 (インデックス10)
+      const currentName = String(row[2] || '');    // Column C (index 2)
+      const currentRoomNumber = row[3];           // Column D (index 3)
+      const checkInDate = row[4];                 // Column E (index 4)
+      const checkOutDate = row[5];                // Column F (index 5)
+      const status = row[10];                     // Column K (index 10)
 
-      // シートの名前も正規化
+      // Also normalize sheet name
       const normalizedCurrentName = normalizeJapaneseText(currentName).toLowerCase().replace(/\s+/g, '');
       const trimmedCurrentRoom = currentRoomNumber.toString().trim().toUpperCase();
 
-      // チェックイン/アウト時刻の調整
+      // Adjust check-in/out times
       const checkInTime = new Date(checkInDate);
       checkInTime.setHours(15, 0, 0, 0);
       
@@ -126,24 +164,37 @@ async function verifyGuest(name, roomNumber) {
     }
     return false;
   } catch (error) {
-    console.error('Error verifying guest:', error.message);
+    console.error('Error verifying guest:', error);
     throw error;
   }
 }
 
-// フィードバック保存とメール送信
+// Save feedback and send email
 async function sendFeedback(feedbackText) {
   if (!feedbackText) return false;
 
   try {
-    // フィードバックをスプレッドシートに保存
+    // Save feedback to spreadsheet
     const sheets = await getSheetsClient();
-    
-    // 日本時間の年月日を取得
-    const now = new Date();
-    const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // JST = UTC + 9h
-    const formattedDate = `${jst.getFullYear()}-${String(jst.getMonth() + 1).padStart(2, '0')}-${String(jst.getDate()).padStart(2, '0')}`;
-    
+
+    // Get date in JST with time
+const now = new Date();
+const jst = new Date(
+  now.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    hour12: false
+  })
+);
+
+const formattedDate = 
+  `${jst.getFullYear()}/` +
+  `${String(jst.getMonth() + 1).padStart(2, '0')}/` +
+  `${String(jst.getDate()).padStart(2, '0')} ` +
+  `${String(jst.getHours()).padStart(2, '0')}:` +
+  `${String(jst.getMinutes()).padStart(2, '0')}`;
+
+// デバッグ用ログ
+console.log('Formatted Date:', formattedDate);
     const newRow = [
       formattedDate,
       feedbackText
@@ -157,10 +208,10 @@ async function sendFeedback(feedbackText) {
       resource: { values: [newRow] }
     });
 
-    // メール送信機能
+    // Send email
     const subject = '裏口パスワードアプリのフィードバック';
     const body = `以下のフィードバックが送信されました：\n\n${feedbackText}\n\n送信日時: ${formattedDate}`;
-    
+
     await transporter.sendMail({
       from: EMAIL_USER,
       to: "tcuyoyusei@gmail.com",
@@ -170,23 +221,37 @@ async function sendFeedback(feedbackText) {
 
     return true;
   } catch (error) {
-    console.error('Error saving feedback or sending email:', error.message);
+    console.error('Error saving feedback or sending email:', error);
     throw error;
   }
 }
 
-// 延泊リクエスト保存
+// Save extend stay request
 async function saveExtendStayRequest(reservationNumber, roomNumber) {
   if (!reservationNumber || !roomNumber) return false;
 
   try {
     const sheets = await getSheetsClient();
-    
-    // 日本時間の年月日を取得
-    const now = new Date();
-    const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // JST = UTC + 9h
-    const formattedDate = `${jst.getFullYear()}-${String(jst.getMonth() + 1).padStart(2, '0')}-${String(jst.getDate()).padStart(2, '0')}`;
-    
+
+    // Get date in JST with time
+const now = new Date();
+const jst = new Date(
+  now.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    hour12: false
+  })
+);
+
+const formattedDate = 
+  `${jst.getFullYear()}/` +
+  `${String(jst.getMonth() + 1).padStart(2, '0')}/` +
+  `${String(jst.getDate()).padStart(2, '0')} ` +
+  `${String(jst.getHours()).padStart(2, '0')}:` +
+  `${String(jst.getMinutes()).padStart(2, '0')}`;
+
+// デバッグ用ログ
+console.log('Formatted Date:', formattedDate);
+
     const newRow = [
       formattedDate,
       reservationNumber,
@@ -203,12 +268,12 @@ async function saveExtendStayRequest(reservationNumber, roomNumber) {
 
     return true;
   } catch (error) {
-    console.error('Error saving extend stay request:', error.message);
+    console.error('Error saving extend stay request:', error);
     throw error;
   }
 }
 
-// 延泊パスワードを確認する関数
+// Verify extend guest
 async function verifyExtendGuest(reservationNumber, roomNumber) {
   try {
     const sheets = await getSheetsClient();
@@ -223,14 +288,14 @@ async function verifyExtendGuest(reservationNumber, roomNumber) {
     
     const rows = response.data.values;
     
-    // 入力された値を整形
+    // Format input values
     const trimmedReservationNumber = reservationNumber.toString().trim();
     const trimmedRoomNumber = roomNumber.toString().trim().toUpperCase();
     
-    // ヘッダー行をスキップ
+    // Skip header row
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      // B:予約番号, C:部屋番号, D:新パスワード
+      // B:reservation number, C:room number, D:new password
       const currentReservationNumber = row[1] ? row[1].toString().trim() : '';
       const currentRoomNumber = row[2] ? row[2].toString().trim().toUpperCase() : '';
       
@@ -241,12 +306,12 @@ async function verifyExtendGuest(reservationNumber, roomNumber) {
     }
     return false;
   } catch (error) {
-    console.error('Error verifying extend guest:', error.message);
+    console.error('Error verifying extend guest:', error);
     throw error;
   }
 }
 
-// 延泊パスワードを取得する関数
+// Get extend password
 async function getExtendPassword(reservationNumber, roomNumber) {
   try {
     const sheets = await getSheetsClient();
@@ -261,20 +326,20 @@ async function getExtendPassword(reservationNumber, roomNumber) {
     
     const rows = response.data.values;
     
-    // 入力された値を整形
+    // Format input values
     const trimmedReservationNumber = String(reservationNumber).trim();
     const trimmedRoomNumber = String(roomNumber).trim().toUpperCase();
     
     console.log(`Searching for reservation: ${trimmedReservationNumber}, room: ${trimmedRoomNumber}`);
     
-    // ヘッダー行をスキップ
+    // Skip header row
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       
-      // 行に十分な列がない場合はスキップ
+      // Skip if row doesn't have enough columns
       if (!row || row.length < 3) continue;
       
-      // B:予約番号, C:部屋番号, D:新パスワード
+      // B:reservation number, C:room number, D:new password
       const currentReservationNumber = row[1] ? String(row[1]).trim() : '';
       const currentRoomNumber = row[2] ? String(row[2]).trim().toUpperCase() : '';
       
@@ -282,7 +347,7 @@ async function getExtendPassword(reservationNumber, roomNumber) {
       
       if (currentReservationNumber === trimmedReservationNumber && 
           currentRoomNumber === trimmedRoomNumber) {
-        // パスワードが存在するか確認
+        // Check if password exists
         const password = row.length > 3 && row[3] ? row[3] : "パスワードが設定されていません";
         console.log(`Found match! Password: ${password}`);
         return password;
@@ -291,7 +356,7 @@ async function getExtendPassword(reservationNumber, roomNumber) {
     console.log("No matching entry found");
     return "パスワードが見つかりません"; // "Password not found"
   } catch (error) {
-    console.error('Error getting extend password:', error.message);
+    console.error('Error getting extend password:', error);
     throw error;
   }
 }
