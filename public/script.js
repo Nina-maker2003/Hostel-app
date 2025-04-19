@@ -138,7 +138,7 @@ async function submitExtendStayRequest() {
 
 // Check credentials for password
 async function checkCredentials() {
-  const name = document.getElementById('name').value.trim();
+  const reservationNumber = document.getElementById('name').value.trim();
   const roomNumber = document.getElementById('roomNumber').value.trim();
   const loadingDiv = document.getElementById('loading');
   const resultDiv = document.getElementById('result');
@@ -147,7 +147,7 @@ async function checkCredentials() {
   resultDiv.innerHTML = '';
   resultDiv.className = '';
   
-  if (!name || !roomNumber) {
+  if (!reservationNumber || !roomNumber) {
     showMessage('全ての項目を入力してください / Please fill in all fields', 'error');
     return;
   }
@@ -171,7 +171,7 @@ async function checkCredentials() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, roomNumber }),
+      body: JSON.stringify({ name: reservationNumber, roomNumber }),
     });
     
     const data = await response.json();

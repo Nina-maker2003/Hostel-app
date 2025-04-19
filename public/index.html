@@ -29,10 +29,10 @@
   <!-- パスワード照会ページ -->
   <div id="passwordPage" class="page active">
     <h1>裏口パスワード<br><small>Back Door Password</small></h1>
-    <p>お名前と部屋番号をご入力ください。<br>
-    <small>Please enter your name and room number</small></p>
+    <p>予約番号(-を含める）と部屋番号をご入力ください。<br>
+    <small>Please enter your reservation number (include "-" if it's part of it) and room number</small></p>
     <div class="form-group">
-      <input type="text" id="name" placeholder="ご予約名 / Name" autocomplete="off">
+      <input type="text" id="name" placeholder="予約番号 / Reservation Number" autocomplete="off">
     </div>
     <div class="form-group">
       <input type="text" id="roomNumber" placeholder="部屋番号 / Room Number (例: 2F01)" autocomplete="off">
@@ -47,8 +47,8 @@
      <!-- 延泊パスワードセクション（新規追加） -->
      <div class="password-section">
       <h1>延泊パスワード<br><small>Extended Stay Password</small></h1>
-      <p>予約番号と部屋番号をご入力ください。<br>
-      <small>Please enter your reservation number and room number</small></p>
+      <p>新規予約番号と現在の部屋番号をご入力ください。<br>
+      <small>Please enter your new reservation number and current room number</small></p>
       <div class="form-group">
         <input type="text" id="extendPasswordReservation" placeholder="予約番号 / Reservation Number" autocomplete="off">
       </div>

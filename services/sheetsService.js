@@ -118,7 +118,7 @@ async function getPassword() {
 }
 
 // Verify guest
-async function verifyGuest(name, roomNumber) {
+async function verifyGuest(reservationNumber, roomNumber) {
   try {
     const sheets = await getSheetsClient();
     const response = await sheets.spreadsheets.values.get({
@@ -129,101 +129,62 @@ async function verifyGuest(name, roomNumber) {
     const rows = response.data.values;
     const now = new Date();
     
-    // Normalize input name
-    const normalizedInputName = normalizeJapaneseText(name).toLowerCase().replace(/\s+/g, '');
+    
+     // Process input reservation number (trim spaces)
+     const inputReservationNumber = reservationNumber.toString().trim();
     const trimmedInputRoom = roomNumber.toString().trim().toUpperCase();
 
-    // Skip header row
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i];
-      const currentName = String(row[2] || '');    // Column C (index 2)
-      const currentRoomNumber = row[3];           // Column D (index 3)
-      const checkInDate = row[4];                 // Column E (index 4)
-      const checkOutDate = row[5];                // Column F (index 5)
-      const status = row[10];                     // Column K (index 10)
+// Skip header row
+for (let i = 1; i < rows.length; i++) {
+  const row = rows[i];
+  const currentReservationFull = String(row[0] || '');  // Column A (index 0)
+  const currentRoomNumber = row[3];                    // Column D (index 3)
+  const checkInDate = row[4];                         // Column E (index 4)
+  const checkOutDate = row[5];                        // Column F (index 5)
+  const status = row[10];                             // Column K (index 10)
 
-      // Also normalize sheet name
-      const normalizedCurrentName = normalizeJapaneseText(currentName).toLowerCase().replace(/\s+/g, '');
-      const trimmedCurrentRoom = currentRoomNumber.toString().trim().toUpperCase();
-
-      // Adjust check-in/out times
-      const checkInTime = new Date(checkInDate);
-      checkInTime.setHours(15, 0, 0, 0);
-      
-      const checkOutTime = new Date(checkOutDate);
-      checkOutTime.setHours(10, 0, 0, 0);
-
-      if (
-        normalizedCurrentName === normalizedInputName &&
-        trimmedCurrentRoom === trimmedInputRoom &&
-        status?.toString().trim() === '滞在' &&
-        now >= checkInTime && now <= checkOutTime
-      ) {
-        return true;
-      }
+  // Process current reservation based on format rules
+  let currentReservationFormatted = '';
+  
+  // Rule 1: If it contains "_", remove everything after "_"
+  if (currentReservationFull.includes('_')) {
+    currentReservationFormatted = currentReservationFull.split('_')[0];
+  } 
+  // Rule 2: If it doesn't contain "_" but has "-", remove everything after the last "-"
+  else {
+    // Find the last "-" in the string
+    const lastDashIndex = currentReservationFull.lastIndexOf('-');
+    if (lastDashIndex !== -1) {
+      currentReservationFormatted = currentReservationFull.substring(0, lastDashIndex);
+    } else {
+      // No "_" or "-", use as is
+      currentReservationFormatted = currentReservationFull;
     }
-    return false;
-  } catch (error) {
-    console.error('Error verifying guest:', error);
-    throw error;
+  }
+  
+  const trimmedCurrentRoom = currentRoomNumber.toString().trim().toUpperCase();
+
+  // Adjust check-in/out times
+  const checkInTime = new Date(checkInDate);
+  checkInTime.setHours(15, 0, 0, 0);
+  
+  const checkOutTime = new Date(checkOutDate);
+  checkOutTime.setHours(10, 0, 0, 0);
+
+  if (
+    currentReservationFormatted === inputReservationNumber &&
+    trimmedCurrentRoom === trimmedInputRoom &&
+    status?.toString().trim() === '滞在' &&
+    now >= checkInTime && now <= checkOutTime
+  ) {
+    return true;
   }
 }
-
-// Save feedback and send email
-async function sendFeedback(feedbackText) {
-  if (!feedbackText) return false;
-
-  try {
-    // Save feedback to spreadsheet
-    const sheets = await getSheetsClient();
-
-    // Get date in JST with time
-const now = new Date();
-const jst = new Date(
-  now.toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    hour12: false
-  })
-);
-
-const formattedDate = 
-  `${jst.getFullYear()}/` +
-  `${String(jst.getMonth() + 1).padStart(2, '0')}/` +
-  `${String(jst.getDate()).padStart(2, '0')} ` +
-  `${String(jst.getHours()).padStart(2, '0')}:` +
-  `${String(jst.getMinutes()).padStart(2, '0')}`;
-
-// デバッグ用ログ
-console.log('Formatted Date:', formattedDate);
-    const newRow = [
-      formattedDate,
-      feedbackText
-    ];
-
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: 'フィードバック!A:B',
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      resource: { values: [newRow] }
-    });
-
-    // Send email
-    const subject = '裏口パスワードアプリのフィードバック';
-    const body = `以下のフィードバックが送信されました：\n\n${feedbackText}\n\n送信日時: ${formattedDate}`;
-
-    await transporter.sendMail({
-      from: EMAIL_USER,
-      to: "tcuyoyusei@gmail.com",
-      subject: subject,
-      text: body
-    });
-
-    return true;
-  } catch (error) {
-    console.error('Error saving feedback or sending email:', error);
-    throw error;
-  }
+return false;
+} catch (error) {
+console.error('Error verifying guest:', error);
+throw error;
+}
 }
 
 // Save extend stay request
@@ -234,11 +195,11 @@ async function saveExtendStayRequest(reservationNumber, roomNumber) {
     const sheets = await getSheetsClient();
 
     // Get date in JST with time
-const now = new Date();
-const jst = new Date(
-  now.toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    hour12: false
+    const now = new Date();
+    const jst = new Date(
+       now.toLocaleString('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+        hour12: false
   })
 );
 
@@ -265,8 +226,24 @@ console.log('Formatted Date:', formattedDate);
       insertDataOption: 'INSERT_ROWS',
       resource: { values: [newRow] }
     });
-
-    return true;
+     // メール送信を追加
+     const subject = '延泊リクエストが送信されました';
+     const body = `以下の延泊リクエストが送信されました：\n\n予約番号: ${reservationNumber}\n部屋番号: ${roomNumber}\n\n送信日時: ${formattedDate}`;
+ 
+     console.log('Extend Stay - Attempting to send email...');
+     try {
+       await transporter.sendMail({
+         from: EMAIL_USER,
+         to: "tcuyoyusei@gmail.com",
+         subject: subject,
+         text: body
+       });
+       console.log('Extend Stay - Email sent successfully');
+     } catch (emailError) {
+       console.error('Extend Stay - Error sending email:', emailError);
+       // Still return true since the spreadsheet update was successful
+     }    
+     return true;
   } catch (error) {
     console.error('Error saving extend stay request:', error);
     throw error;
@@ -360,6 +337,65 @@ async function getExtendPassword(reservationNumber, roomNumber) {
     throw error;
   }
 }
+
+
+// Save feedback and send email
+async function sendFeedback(feedbackText) {
+  if (!feedbackText) return false;
+
+  try {
+    // Save feedback to spreadsheet
+    const sheets = await getSheetsClient();
+
+    // Get date in JST with time
+const now = new Date();
+const jst = new Date(
+  now.toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    hour12: false
+  })
+);
+
+const formattedDate = 
+  `${jst.getFullYear()}/` +
+  `${String(jst.getMonth() + 1).padStart(2, '0')}/` +
+  `${String(jst.getDate()).padStart(2, '0')} ` +
+  `${String(jst.getHours()).padStart(2, '0')}:` +
+  `${String(jst.getMinutes()).padStart(2, '0')}`;
+
+// デバッグ用ログ
+console.log('Formatted Date:', formattedDate);
+    const newRow = [
+      formattedDate,
+      feedbackText
+    ];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'フィードバック!A:B',
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values: [newRow] }
+    });
+
+    // Send email
+    const subject = '裏口パスワードアプリのフィードバック';
+    const body = `以下のフィードバックが送信されました：\n\n${feedbackText}\n\n送信日時: ${formattedDate}`;
+
+    await transporter.sendMail({
+      from: EMAIL_USER,
+      to: "tcuyoyusei@gmail.com",
+      subject: subject,
+      text: body
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error saving feedback or sending email:', error);
+    throw error;
+  }
+}
+
 
 module.exports = {
   testConnection,

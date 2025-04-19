@@ -29,12 +29,12 @@ app.get('/api/password', async (req, res) => {
 // API endpoint to verify guest credentials
 app.post('/api/verify', async (req, res) => {
   try {
-    const { name, roomNumber } = req.body;
+    const {name, roomNumber } = req.body;
     
-    if (!name || !roomNumber) {
-      return res.status(400).json({ error: 'Name and room number are required' });
+   if (!name || !roomNumber) {
+      return res.status(400).json({ error: 'Reservation number and room number are required' });
     }
-    
+
     const isValid = await sheetsService.verifyGuest(name, roomNumber);
     res.json({ isValid });
   } catch (error) {
