@@ -47,8 +47,8 @@
      <!-- 延泊パスワードセクション（新規追加） -->
      <div class="password-section">
       <h1>延泊パスワード<br><small>Extended Stay Password</small></h1>
-      <p>新規予約番号と現在の部屋番号をご入力ください。<br>
-      <small>Please enter your new reservation number and current room number</small></p>
+      <p><strong class="extend-link" onclick="changePage('extendStayPage')">新規</strong>予約番号と現在の部屋番号をご入力ください。<br>
+      <small>Please enter your <strong class="extend-link" onclick="changePage('extendStayPage')">new</strong> reservation number and current room number</small></p>
       <div class="form-group">
         <input type="text" id="extendPasswordReservation" placeholder="予約番号 / Reservation Number" autocomplete="off">
       </div>
@@ -65,7 +65,7 @@
 
     <!-- フィードバックフォーム -->
     <div class="feedback-container">
-      <span class="feedback-toggle" onclick="toggleFeedbackForm()">問題を報告する / Report an issue</span>
+      <span class="feedback-toggle" onclick="toggleFeedbackForm()">サイトの問題を報告する / Report a website issue </span>
       <div id="feedbackForm" style="display: none;">
         <h3>フィードバック / Feedback</h3>
         <div class="form-group">

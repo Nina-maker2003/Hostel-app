@@ -195,6 +195,16 @@ body {
   .page.active {
     display: block;
   }
+
+  .extend-link {
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  .extend-link:hover {
+    color: #004080;
+  }
   
   /* リクエストページ用のスタイル */
   .request-buttons {
@@ -232,6 +242,8 @@ body {
     text-decoration: underline;
   }
   
+
+
   /* 延泊予約ガイド用のスタイル */
   .extend-guide {
     margin-top: 40px;
