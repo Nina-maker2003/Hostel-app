@@ -44,32 +44,13 @@
     </div>
     <div id="result"></div>
 
-     <!-- 延泊パスワードセクション（新規追加） -->
-     <div class="password-section">
-      <h1>延泊パスワード<br><small>Extended Stay Password</small></h1>
-      <p><strong class="extend-link" onclick="changePage('extendStayPage')">新規</strong>予約番号と現在の部屋番号をご入力ください。<br>
-      <small>Please enter your <strong class="extend-link" onclick="changePage('extendStayPage')">new</strong> reservation number and current room number</small></p>
-      <div class="form-group">
-        <input type="text" id="extendPasswordReservation" placeholder="予約番号 / Reservation Number" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <input type="text" id="extendPasswordRoomNumber" placeholder="部屋番号 / Room Number (例: 2F01)" autocomplete="off">
-      </div>
-      <button onclick="checkExtendPasswordCredentials()">パスワードを表示 / Check Password</button>
-      <div id="extendPasswordLoading" style="display: none;">
-        <div class="spinner"></div>
-        <p>確認中...</p>
-      </div>
-      <div id="extendPasswordResult"></div>
-    </div>
-
     <!-- フィードバックフォーム -->
     <div class="feedback-container">
       <span class="feedback-toggle" onclick="toggleFeedbackForm()">サイトの問題を報告する / Report a website issue </span>
       <div id="feedbackForm" style="display: none;">
         <h3>フィードバック / Feedback</h3>
         <div class="form-group">
-          <textarea id="feedbackText" placeholder="エラーの内容や改善点などをご記入ください（200文字以内） / Please enter your feedback (up to 200 characters)" maxlength="200"></textarea>
+          <textarea id="feedbackText" placeholder="エラーの内容や改善点などをご記入ください（150文字以内） / Please enter your feedback on this system (up to 150 characters)" maxlength="150"></textarea>
         </div>
         <button onclick="submitFeedback()">送信 / Submit Feedback</button>
         <div id="feedbackResult"></div>
@@ -78,13 +59,15 @@
   </div>
 
   <!-- 延泊リクエストページ -->
+  <!-- input id を変えるかも-->
+
   <div id="extendStayPage" class="page">
     <h1>延泊リクエスト<br><small>Extend Your Stay</small></h1>
-    <p><span class="emphasis">新パスワード発行のために</span>延泊予約完了後に、新規予約の予約番号とお客様の部屋番号をご入力ください。<br>
-    <small>[<span class="emphasis">To get your new password</span>, please enter your new reservation number and current room number <span class="emphasis">after</span> making an extension reservation]</small></p>
+    <p><strong>新パスワード発行のために</strong>延泊予約完了後に、お客様のメールアドレスと現在の部屋番号をご入力ください。<br>
+    <small>[<strong>To get your new password</strong>, please enter your Email address and current room number <strong>after</strong> making an extension reservation]</small></p>
     
     <div class="form-group">
-      <input type="text" id="extendReservationNumber" placeholder="予約番号 / Reservation Number" autocomplete="off">
+      <input type="text" id="extendReservationNumber" placeholder="メールアドレス / Email Address" autocomplete="off">
     </div>
     <div class="form-group">
       <input type="text" id="extendRoomNumber" placeholder="部屋番号 / Room Number (例: 2F01)" autocomplete="off">
@@ -93,18 +76,23 @@
     <div id="extendStayResult"></div>
     
     <!-- 延泊予約ガイド -->
+    <!-- 文章変更の必要性あり -->
+
     <div class="extend-guide">
       <h3>延泊予約の仕方 / How to extend your stay</h3>
       <ol>
         <li><a href="https://go-tomariyaueno.reservation.jp/ja" target="_blank">公式サイト</a>の延泊専用プランにて新規予約<br>
             <small>Make a new reservation through the extension plan on our <a href="https://go-tomariyaueno.reservation.jp/en" target="_blank">official website</a></small>
         </li>
-        <li>お客様が前回利用された予約サイトより新規予約<br>
-            <small>Make a new reservation through the same booking site you used last time</small>
+        <li>お客様が<span class="underline_black">前回利用された予約サイト</span>より新規予約<br>
+            <small>Make a new reservation through <span class="underline_black">the same booking site you used last time</span></small>
         </li>
       </ol>
-      <p class="important-notice">★チェックイン開始時刻(15:00)までに<strong>メニュー＞パスワード照会</strong>にて新パスワードを確認できるようになります。</p> 
-            <small>★The new password will be available via <strong>Menu > Check Password</strong> by the check-in time (3:00 PM).</small>
+
+      <p class="instruction-note">⇒予約完了後に、上記のリクエストを送信！<br>
+        <small>⇒After completing your reservation, please submit the request above!</small></p>
+      <p class="important-notice">★チェックイン開始時刻(15:00)までに<strong>お客様が入力されたメールアドレス宛</strong>に新パスワードが送信されます。</p> 
+            <small>★The new password will be sent to <strong>the Email address you entered above</strong> by the check-in time (3:00 PM).</small>
     </div>   
     </div>
   </div>

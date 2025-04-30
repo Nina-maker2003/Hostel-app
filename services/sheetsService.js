@@ -10,7 +10,7 @@ const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// Configure email transporter
+// Configure email transporter（メール送信者の設定）
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -84,8 +84,6 @@ async function testConnection() {
   }
 }
 
-// Rest of your functions remain the same
-// ...
 
 // Japanese text normalization
 function normalizeJapaneseText(text) {
@@ -143,7 +141,7 @@ for (let i = 1; i < rows.length; i++) {
   const checkOutDate = row[5];                        // Column F (index 5)
   const status = row[10];                             // Column K (index 10)
 
-  // Process current reservation based on format rules
+  // Process current reservation based on format rules（inntoと実際の予約番号のズレを修正）)
   let currentReservationFormatted = '';
   
   // Rule 1: If it contains "_", remove everything after "_"
@@ -210,7 +208,7 @@ const formattedDate =
   `${String(jst.getHours()).padStart(2, '0')}:` +
   `${String(jst.getMinutes()).padStart(2, '0')}`;
 
-// デバッグ用ログ
+// Extend Stay Requestデバッグ用ログ
 console.log('Formatted Date:', formattedDate);
 
     const newRow = [
@@ -228,7 +226,7 @@ console.log('Formatted Date:', formattedDate);
     });
      // メール送信を追加
      const subject = '延泊リクエストが送信されました';
-     const body = `以下の延泊リクエストが送信されました：\n\n予約番号: ${reservationNumber}\n部屋番号: ${roomNumber}\n\n送信日時: ${formattedDate}`;
+     const body = `以下の延泊リクエストが送信されました：\n\nメールアドレス: ${reservationNumber}\n部屋番号: ${roomNumber}\n\n送信日時: ${formattedDate}`;
  
      console.log('Extend Stay - Attempting to send email...');
      try {
@@ -249,95 +247,6 @@ console.log('Formatted Date:', formattedDate);
     throw error;
   }
 }
-
-// Verify extend guest
-async function verifyExtendGuest(reservationNumber, roomNumber) {
-  try {
-    const sheets = await getSheetsClient();
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: '延泊リスト!A:D',
-    });
-    
-    if (!response.data.values || response.data.values.length <= 1) {
-      return false;
-    }
-    
-    const rows = response.data.values;
-    
-    // Format input values
-    const trimmedReservationNumber = reservationNumber.toString().trim();
-    const trimmedRoomNumber = roomNumber.toString().trim().toUpperCase();
-    
-    // Skip header row
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i];
-      // B:reservation number, C:room number, D:new password
-      const currentReservationNumber = row[1] ? row[1].toString().trim() : '';
-      const currentRoomNumber = row[2] ? row[2].toString().trim().toUpperCase() : '';
-      
-      if (currentReservationNumber === trimmedReservationNumber && 
-          currentRoomNumber === trimmedRoomNumber) {
-        return true;
-      }
-    }
-    return false;
-  } catch (error) {
-    console.error('Error verifying extend guest:', error);
-    throw error;
-  }
-}
-
-// Get extend password
-async function getExtendPassword(reservationNumber, roomNumber) {
-  try {
-    const sheets = await getSheetsClient();
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: '延泊リスト!A:D',
-    });
-    
-    if (!response.data.values || response.data.values.length <= 1) {
-      return "パスワードが見つかりません"; // "Password not found"
-    }
-    
-    const rows = response.data.values;
-    
-    // Format input values
-    const trimmedReservationNumber = String(reservationNumber).trim();
-    const trimmedRoomNumber = String(roomNumber).trim().toUpperCase();
-    
-    console.log(`Searching for reservation: ${trimmedReservationNumber}, room: ${trimmedRoomNumber}`);
-    
-    // Skip header row
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i];
-      
-      // Skip if row doesn't have enough columns
-      if (!row || row.length < 3) continue;
-      
-      // B:reservation number, C:room number, D:new password
-      const currentReservationNumber = row[1] ? String(row[1]).trim() : '';
-      const currentRoomNumber = row[2] ? String(row[2]).trim().toUpperCase() : '';
-      
-      console.log(`Checking row ${i}: reservation=${currentReservationNumber}, room=${currentRoomNumber}`);
-      
-      if (currentReservationNumber === trimmedReservationNumber && 
-          currentRoomNumber === trimmedRoomNumber) {
-        // Check if password exists
-        const password = row.length > 3 && row[3] ? row[3] : "パスワードが設定されていません";
-        console.log(`Found match! Password: ${password}`);
-        return password;
-      }
-    }
-    console.log("No matching entry found");
-    return "パスワードが見つかりません"; // "Password not found"
-  } catch (error) {
-    console.error('Error getting extend password:', error);
-    throw error;
-  }
-}
-
 
 // Save feedback and send email
 async function sendFeedback(feedbackText) {
@@ -403,6 +312,4 @@ module.exports = {
   verifyGuest,
   sendFeedback,
   saveExtendStayRequest,
-  verifyExtendGuest,
-  getExtendPassword
 };

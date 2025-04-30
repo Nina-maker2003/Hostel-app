@@ -75,39 +75,6 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
-// API endpoint to verify extend stay guest
-app.post('/api/verifyExtend', async (req, res) => {
-  try {
-    const { reservationNumber, roomNumber } = req.body;
-    
-    if (!reservationNumber || !roomNumber) {
-      return res.status(400).json({ error: 'Reservation number and room number are required' });
-    }
-    
-    const isValid = await sheetsService.verifyExtendGuest(reservationNumber, roomNumber);
-    res.json({ isValid });
-  } catch (error) {
-    console.error('Error verifying extend guest:', error);
-    res.status(500).json({ error: 'Failed to verify extend guest' });
-  }
-});
-
-// API endpoint to get extend stay password
-app.post('/api/extendPassword', async (req, res) => {
-  try {
-    const { reservationNumber, roomNumber } = req.body;
-    
-    if (!reservationNumber || !roomNumber) {
-      return res.status(400).json({ error: 'Reservation number and room number are required' });
-    }
-    
-    const password = await sheetsService.getExtendPassword(reservationNumber, roomNumber);
-    res.json({ password });
-  } catch (error) {
-    console.error('Error getting extend password:', error);
-    res.status(500).json({ error: 'Failed to get extend password' });
-  }
-});
 
 // Test connection endpoint
 app.get('/api/test', async (req, res) => {

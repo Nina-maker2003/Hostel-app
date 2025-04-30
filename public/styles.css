@@ -113,11 +113,12 @@ body {
     cursor: pointer;
     z-index: 100;
   }
-   /* パスワードセクション区切り用スタイル */
+   /* パスワードセクション区切り用スタイル（もう使っていない） */
    .password-section {
     margin-bottom: -40px;
     padding-bottom: -20px;
   }
+
   .menu-icon {
     margin-right: 5px;
     display: flex;
@@ -246,7 +247,7 @@ body {
 
   /* 延泊予約ガイド用のスタイル */
   .extend-guide {
-    margin-top: 40px;
+    margin-top: 10px;
     padding: 15px;
     border-radius: 8px;
     background-color: #f8f9fa;
@@ -288,7 +289,18 @@ body {
     color: #666;
     margin-top: 3px;
   }
-  .emphasis {
-    color: red;
-    font-weight: bold;
-  }
+
+  .underline_black{
+   text-decoration:underline solid #666;
+    }
+  
+  .instruction-note {
+      color: #3498db;  /* 赤色テキスト */
+      font-weight: bold;  /* 太字 */
+      padding-bottom: 5px;  /* 下部に余白を追加 */
+      border-bottom: 2px dotted #666;  /* 下部に点線を追加 */
+      margin-bottom: -5px;  /* 点線の下に余白を追加 */
+    }
+    .instruction-note small {
+      color: #3498db; 
+    }

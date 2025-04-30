@@ -86,7 +86,8 @@ function hideRequestSubpages() {
   document.querySelector('.request-buttons').style.display = 'grid';
 }
 
-// Submit extend stay request
+// Submit extend stay request(延泊リクエスト)
+// 仕様変更の影響でextendReservationNumberのままになっているが実際はメールアドレス
 async function submitExtendStayRequest() {
   const reservationNumber = document.getElementById('extendReservationNumber').value.trim();
   const roomNumber = document.getElementById('extendRoomNumber').value.trim();
@@ -136,7 +137,7 @@ async function submitExtendStayRequest() {
   }
 }
 
-// Check credentials for password
+// Check credentials for password(Backdoor)
 async function checkCredentials() {
   const reservationNumber = document.getElementById('name').value.trim();
   const roomNumber = document.getElementById('roomNumber').value.trim();
@@ -212,80 +213,28 @@ async function showPassword() {
   }
 }
 
-async function checkExtendPasswordCredentials() {
-  const reservationNumber = document.getElementById('extendPasswordReservation').value.trim();
-  const roomNumber = document.getElementById('extendPasswordRoomNumber').value.trim();
-  const loadingDiv = document.getElementById('extendPasswordLoading');
-  const resultDiv = document.getElementById('extendPasswordResult');
-  
-  // Clear result display
-  resultDiv.innerHTML = '';
-  resultDiv.className = '';
-  
-  if (!reservationNumber || !roomNumber) {
-    showMessage('全ての項目を入力してください / Please fill in all fields', 'error', resultDiv);
-    return;
-  }
-  
-  // Clear existing timer
-  if (extendPasswordTimer) {
-    clearTimeout(extendPasswordTimer);
-    extendPasswordTimer = null;
-  }
-  
-  // Show loading indicator
-  loadingDiv.style.display = 'block';
-  
-  try {
-    const response = await fetch('/api/extendPassword', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ reservationNumber, roomNumber }),
-    });
-    
-    const data = await response.json();
-    loadingDiv.style.display = 'none'; // Hide loading
-    
-    if (data.password && data.password !== "パスワードが見つかりません" && data.password !== "パスワードが設定されていません") {
-      resultDiv.innerHTML = `<div class="success-message">延泊パスワード: <strong>${data.password}</strong></div>`;
-      resultDiv.className = 'success';
-      
-      // Set timer
-      extendPasswordTimer = setTimeout(() => {
-        resultDiv.innerHTML = '';
-        resultDiv.className = '';
-      }, 7000);
-    } else {
-      showMessage('入力情報が正しくないか、パスワードが見つかりません / Information incorrect or password not found', 'error', resultDiv);
-    }
-    
-    // Don't clear input fields until after getting a result
-    if (data.password && data.password !== "パスワードが見つかりません" && data.password !== "パスワードが設定されていません") {
-      // Clear input fields only after successful retrieval
-      document.getElementById('extendPasswordReservation').value = '';
-      document.getElementById('extendPasswordRoomNumber').value = '';
-    }
-  } catch (error) {
-    loadingDiv.style.display = 'none'; // Hide loading
-    showError(resultDiv);
-  }
-}
-// Show error message
-function showError(customResultDiv) {
-  // If customResultDiv is provided, use it, otherwise use default
-  const resultDiv = customResultDiv || document.getElementById('result');
-  showMessage('エラーが発生しました / An error occurred', 'error', resultDiv);
-}
-
-// Show message with type
-function showMessage(message, type, customResultDiv) {
-  // If customResultDiv is provided, use it, otherwise use default
-  const resultDiv = customResultDiv || document.getElementById('result');
+// Add the showMessage function
+function showMessage(message, type) {
+  const resultDiv = document.getElementById('result');
   resultDiv.innerHTML = message;
   resultDiv.className = type;
+  
+  // Clear the message after some time (optional)
+  if (passwordTimer) {
+    clearTimeout(passwordTimer);
+  }
+  
+  passwordTimer = setTimeout(() => {
+    resultDiv.innerHTML = '';
+    resultDiv.className = '';
+  }, 6000);
 }
+
+// Add the showError function(server related error, APIやinternetなど) 
+function showError() {
+  showMessage('エラーが発生しました。後でもう一度お試しください。 / An error occurred. Please try again later.', 'error');
+}
+
 
 // Toggle feedback form
 function toggleFeedbackForm() {
