@@ -293,7 +293,7 @@ console.log('Formatted Date:', formattedDate);
 
     await transporter.sendMail({
       from: EMAIL_USER,
-      to: "tcuyoyusei@gmail.com",
+      to: "************@gmail.com",
       subject: subject,
       text: body
     });
